@@ -13,21 +13,13 @@ def generate_orca_input(xyz_path, method, basis, inp_path, solvent=None, charge=
         print(f"⚠️  Skipping malformed file: {xyz_path}")
         return False
 
-    title = f"Opt Freq {method} {basis} TightSCF RIJCOSX D3BJ"
+    title = f"Opt Freq {method} {basis}"
     header = f"""\
-! {title}
-%maxcore 4000
-%pal nprocs 4 end
+! {title} cpcm(water)
+%maxcore 1000
+%pal nprocs 16 end
 %scf
    maxiter 300
-end
-"""
-
-    if solvent:
-        header += f"""\
-%cpcm
-   smd true
-   smdsolvent "{solvent}"
 end
 """
 
