@@ -16,8 +16,8 @@ def generate_orca_input(xyz_path, method, basis, inp_path, solvent=None, charge=
     title = f"Opt Freq {method} {basis}"
     header = f"""\
 ! {title} cpcm(water)
-%maxcore 1000
-%pal nprocs 16 end
+%maxcore 2000
+%pal nprocs 8 end
 %scf
    maxiter 300
 end
@@ -50,8 +50,8 @@ def run_orca(inp_path, orca_path):
 def main():
     parser = argparse.ArgumentParser(description="Generate and run ORCA input files from prefix_*.xyz")
     parser.add_argument("--prefix", default="prefix", help="Filename prefix (default: prefix)")
-    parser.add_argument("--method", default="xB97-XD3", help="Functional (default: xB97-XD3)")
-    parser.add_argument("--basis", default="def2-TZVPP", help="Basis set (default: def2-TZVPP)")
+    parser.add_argument("--method", default="wB97X-D3", help="Functional (default: wB97X-D3)")
+    parser.add_argument("--basis", default="def2-TZVPP", help="Basis set (default: def2-TZVP)")
     parser.add_argument("--orca", default="/opt/orca/6.0.1/orca", help="Path to ORCA executable")
     parser.add_argument("--solvent", help="Optional implicit solvent name (e.g., water, acetonitrile)")
     parser.add_argument("--charge", type=int, default=0, help="Molecular charge (default: 0)")
