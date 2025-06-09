@@ -2,10 +2,8 @@
 import re
 import glob
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 
-# ---- SETTINGS ----
+# Define timing keys and readable labels
 timing_keys = {
     "Sum of individual times": "Total",
     "Startup calculation": "Startup",
@@ -16,9 +14,11 @@ timing_keys = {
     "SCF Gradient evaluation": "Gradient",
     "Geometry relaxation": "Relax"
 }
+
+# Regex to extract time
 time_re = re.compile(r"\.\.\.\s+([0-9.]+)\s+sec")
 
-# ---- PARSE LOG FILES ----
+# Parse files
 rows = []
 
 for file in sorted(glob.glob("pyr-*cores.log")):
@@ -39,46 +39,27 @@ for file in sorted(glob.glob("pyr-*cores.log")):
 
     rows.append(times)
 
-# ---- CREATE DATAFRAME ----
+# Create DataFrame
 df = pd.DataFrame(rows)
 df = df.sort_values("Cores").reset_index(drop=True)
+
+# Ensure all columns are present
 for label in timing_keys.values():
     if label not in df:
-        df[label] = float("nan")
-df = df[["Cores"] + list(timing_keys.values())]
+        df[label] = 0.0
 
-# ---- PRINT MARKDOWN ----
+# Format as Markdown
 header = "| " + " | ".join(df.columns) + " |"
 separator = "| " + " | ".join(["---"] * len(df.columns)) + " |"
 rows_md = [header, separator]
 for _, row in df.iterrows():
-    row_str = "| " + " | ".join(
-        f"{v:.3f}" if pd.notna(v) and isinstance(v, float) else "" for v in row
-    ) + " |"
+    row_str = "| " + " | ".join(f"{v:.3f}" if isinstance(v, float) else str(v) for v in row) + " |"
     rows_md.append(row_str)
 
+# Output Markdown table
 md_output = "\n".join(rows_md)
 print(md_output)
 
+# Optionally save to .md file
 with open("timing_table.md", "w") as f:
     f.write(md_output + "\n")
-
-# ---- PLOT ----
-components = ["Startup", "SCF", "Integrals", "SCF_Response", "Properties", "Gradient", "Relax"]
-colors = plt.cm.tab20.colors
-
-fig, ax = plt.subplots(figsize=(10, 6))
-bottom = np.zeros(len(df))
-
-for i, comp in enumerate(components):
-    if comp in df:
-        ax.bar(df["Cores"], df[comp].fillna(0), bottom=bottom, label=comp, color=colors[i])
-        bottom += df[comp].fillna(0)
-
-ax.set_xlabel("Number of Cores")
-ax.set_ylabel("Time (seconds)")
-ax.set_title("Timing Breakdown vs Number of Cores")
-ax.legend(title="Component", loc="upper right")
-ax.grid(True, linestyle="--", alpha=0.6)
-plt.tight_layout()
-plt.savefig("timing_plot.png", dpi=300)

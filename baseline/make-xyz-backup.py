@@ -1,17 +1,13 @@
+#!/usr/bin/env python3
 import argparse
 import re
 import os
-
-periodic_table = {
-    1: 'H', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 16: 'S', 17: 'Cl', 35: 'Br', 53: 'I'
-}
 
 def extract_last_geometry(filename):
     atoms = []
     with open(filename, 'r') as f:
         lines = f.readlines()
-    
-    # for converged log files
+
     for i, line in enumerate(lines):
         if "Final structure (Angstroms):" in line:
             # Geometry starts 3 lines after this one:
@@ -25,15 +21,12 @@ def extract_last_geometry(filename):
                     atoms.append((symbol, float(x), float(y), float(z)))
                 else:
                     break
+            break  # once found, no need to keep scanning
+
     if not atoms:
         raise RuntimeError("❌ Final structure not found in the file.")
-    return atoms
 
-def atomic_symbol(z):
-    periodic_table = {
-        1: 'H', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 16: 'S', 17: 'Cl', 35: 'Br', 53: 'I'
-    }
-    return periodic_table.get(z, f"Z{z}")
+    return atoms
 
 def write_xyz(atoms, outfile):
     with open(outfile, 'w') as f:

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import re
 import sys
 import os
@@ -45,4 +46,4 @@ with open(outfile, "w") as f:
     for symbol, x, y, z in atoms:
         f.write(f"{symbol:<2}  {x:12.6f}  {y:12.6f}  {z:12.6f}\n")
 
-print(f"✅ Geometry written to {outfile}")
+print(f"Geometry written to {outfile}")
